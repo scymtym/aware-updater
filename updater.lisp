@@ -34,6 +34,14 @@
                           :error-output *standard-output*
                           arguments))
 
+;;; System
+
+(defun reboot-system ()
+  (run `("sudo" "systemctl" "reboot")))
+
+(defun poweroff-system ()
+  (run `("sudo" "systemctl" "poweroff")))
+
 ;;; Systemd service
 
 (defun stop-aware-service ()
@@ -230,12 +238,19 @@
       (:title "Home"))
      (:body
       (:div :class "container"
+            (:h2 "System")
+            (:div :class "row"
+                  (:div :class "col col-2"
+                        (:a :class "btn btn-warning" :href "reboot" "Reboot system"))
+                  (:div :class "col col-2"
+                        (:a :class "btn btn-warning" :href "poweroff" "Power off")))
+            (:br)
             (:h2 "Network")
             (:div :class "row"
                   (render-connection stream "ethernet" nil)
                   (render-connection stream "wifi" t)
-                  ; (render-connection stream "citec" t)
-                  )
+                  (when (nth-value 2 (connection-information "citec"))
+                    (render-connection stream "citec" t)))
             (:br)
             (:h2 "AWAre")
             (:p (:a :class "btn btn-primary"
@@ -297,7 +312,32 @@
                   (:pre
                    (:code
                     (out (princ-to-string condition))
+                    (who:fmt "~2%")
                     (out (get-output-stream-string output))))))))))))
+
+(hunchentoot:define-easy-handler (reboot :uri "/reboot") ()
+  (who:with-html-output-to-string (stream)
+    (:html
+     (:head
+      (include-bootstrap stream)
+      (:title "Reboot"))
+     (:body
+      (:div :class "container"
+            (:h2 "Errors")
+            (call-with-shown-output stream 'reboot-system)
+            (:a :class "btn btn-primary" :href "/" "Back"))))))
+
+(hunchentoot:define-easy-handler (poweroff :uri "/poweroff") ()
+  (who:with-html-output-to-string (stream)
+    (:html
+     (:head
+      (include-bootstrap stream)
+      (:title "Power off"))
+     (:body
+      (:div :class "container"
+            (:h2 "Errors")
+            (call-with-shown-output stream 'poweroff-system)
+            (:a :class "btn btn-primary" :href "/" "Back"))))))
 
 (hunchentoot:define-easy-handler (restart :uri "/restart") ()
   (who:with-html-output-to-string (stream)
