@@ -1,0 +1,9 @@
+[Unit]
+Description=AWAre Updater Service
+
+[Service]
+ExecStart=/home/iata/aware-updater/updater
+Restart=always
+
+[Install]
+WantedBy=default.target
