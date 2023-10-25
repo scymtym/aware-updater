@@ -112,6 +112,7 @@
          (base-directory (merge-pathnames
                           (make-pathname :directory '(:relative :back))
                           clone-directory)))
+    (format *trace-output* "Using clone URL ~A~%" url)
     (run `("git" "clone" ,url ,name) :directory base-directory)))
 
 (defun copy-configuration-files (from-directory)
